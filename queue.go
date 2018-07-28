@@ -112,7 +112,9 @@ func (p *MNSQueue) ReceiveMessage(respChan chan MessageReceiveResponse, errChan 
 		resp := MessageReceiveResponse{}
 		_, err := send(p.client, p.decoder, GET, nil, nil, resource, &resp)
 		if err != nil {
-			errChan <- err
+			if !strings.Contains(err.Error(), "MessageNotExist") {
+				errChan <- err
+			}
 		} else {
 			respChan <- resp
 		}
@@ -127,8 +129,6 @@ func (p *MNSQueue) ReceiveMessage(respChan chan MessageReceiveResponse, errChan 
 		default:
 		}
 	}
-
-	return
 }
 
 func (p *MNSQueue) BatchReceiveMessage(respChan chan BatchMessageReceiveResponse, errChan chan error, numOfMessages int32, waitseconds ...int64) {
@@ -176,7 +176,6 @@ func (p *MNSQueue) PeekMessage(respChan chan MessageReceiveResponse, errChan cha
 
 		p.checkQPS()
 	}
-	return
 }
 
 func (p *MNSQueue) BatchPeekMessage(respChan chan BatchMessageReceiveResponse, errChan chan error, numOfMessages int32) {
@@ -195,12 +194,14 @@ func (p *MNSQueue) BatchPeekMessage(respChan chan BatchMessageReceiveResponse, e
 
 		p.checkQPS()
 	}
-	return
 }
 
 func (p *MNSQueue) DeleteMessage(receiptHandle string) (err error) {
 	p.checkQPS()
 	_, err = send(p.client, p.decoder, DELETE, nil, nil, fmt.Sprintf("queues/%s/%s?ReceiptHandle=%s", p.name, "messages", receiptHandle), nil)
+	if err != nil && strings.Contains(err.Error(), "MessageNotExist") {
+		err = nil
+	}
 	return
 }
 

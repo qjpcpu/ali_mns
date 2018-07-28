@@ -30,6 +30,12 @@ type MessageSendRequest struct {
 	Priority     int64       `xml:"Priority"`
 }
 
+type TopicMessageSendRequest struct {
+	XMLName     xml.Name    `xml:"Message"`
+	MessageBody Base64Bytes `xml:"MessageBody"`
+	MessageTag  string      `xml:"MessageTag,omitempty"`
+}
+
 type BatchMessageSendRequest struct {
 	XMLName  xml.Name             `xml:"Messages"`
 	Messages []MessageSendRequest `xml:"Message"`

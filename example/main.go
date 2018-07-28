@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/gogap/ali_mns"
 	"github.com/gogap/logs"
+	"github.com/qjpcpu/ali_mns"
 )
 
 type appConf struct {
@@ -30,13 +30,13 @@ func main() {
 		conf.AccessKeyId,
 		conf.AccessKeySecret)
 
-	msg := ali_mns.MessageSendRequest{
-		MessageBody:  []byte("hello gogap/ali_mns"),
-		DelaySeconds: 0,
-		Priority:     8}
+	queue := ali_mns.NewMNSQueue("queue-test-1", client)
 
-	queue := ali_mns.NewMNSQueue("test", client)
-	ret, err := queue.SendMessage(msg)
+	msg := ali_mns.TopicMessageSendRequest{
+		MessageBody: []byte("BIG TEST"),
+	}
+	topic := ali_mns.NewMNSTopic("topic-test1", client)
+	ret, err := topic.SendMessage(msg)
 
 	if err != nil {
 		logs.Error(err)
@@ -52,8 +52,9 @@ func main() {
 			case resp := <-respChan:
 				{
 					logs.Pretty("response:", resp)
+					logs.Pretty("message body:", string(resp.MessageBody))
 					logs.Debug("change the visibility: ", resp.ReceiptHandle)
-					if ret, e := queue.ChangeMessageVisibility(resp.ReceiptHandle, 5); e != nil {
+					if ret, e := queue.ChangeMessageVisibility(resp.ReceiptHandle, 30); e != nil {
 						logs.Error(e)
 					} else {
 						logs.Pretty("visibility changed", ret)
