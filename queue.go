@@ -199,9 +199,6 @@ func (p *MNSQueue) BatchPeekMessage(respChan chan BatchMessageReceiveResponse, e
 func (p *MNSQueue) DeleteMessage(receiptHandle string) (err error) {
 	p.checkQPS()
 	_, err = send(p.client, p.decoder, DELETE, nil, nil, fmt.Sprintf("queues/%s/%s?ReceiptHandle=%s", p.name, "messages", receiptHandle), nil)
-	if err != nil && strings.Contains(err.Error(), "MessageNotExist") {
-		err = nil
-	}
 	return
 }
 
