@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"time"
-
+	"fmt"
 	"github.com/gogap/logs"
 	"github.com/qjpcpu/ali_mns"
+	"io/ioutil"
+	"time"
 )
 
 type appConf struct {
@@ -74,9 +74,12 @@ func main() {
 
 	}()
 
+	go func() {
+		time.Sleep(5 * time.Second)
+		logs.Debug("stopping queue")
+		queue.Stop()
+	}()
 	queue.ReceiveMessage(respChan, errChan)
-	for {
-		time.Sleep(time.Second * 1)
-	}
+	fmt.Println("stopped queue")
 
 }
